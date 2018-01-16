@@ -2,44 +2,53 @@ import React from 'react';
 import { StyleSheet, Text, ListView,View, TouchableOpacity} from 'react-native';
 import {StackNavigator} from 'react-navigation';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import {db} from '../database';
+import {db,shuffle, random3} from '../database';
 
 export default class Spurningar extends React.Component {
   constructor(props){
     super(props);
     this.state = {
-      listi: db,
-      index: 0
+      listi: shuffle(db),
+      index: 0,
+      score: 0
     };
   }
   componentDidMount() {
-    this.setState({listi: db, index: 0});
+    this.setState({listi: shuffle(db), index: 0, score: 0});
   }
 
-  haekka = ()=> {
+  haekka = (b) => {
 
     this.setState((state) => {
-      return {...state, index: state.index + 1};
+      return {...state, index: state.index + 1,score: b? state.score+1:state.score};
     });
   }
+  /*
+     
+  */
   render() {
     const {index,listi} = this.state;
-    
-    let fylki = [];
     const n = listi.length;
-    
 
-    if (index < this.state.listi.length) {
+    let randIndices = random3(index, n);
+    if (index < n) {
       return (
         <View style={styles.container}>
-          <View>
-            <Icon name={this.state.listi[index].mynd} size={80} color="#900" />
+          <View style={{marginBottom: 20}}>
+            <Icon name={listi[index].mynd} size={80} color="#900" />
+            
           </View>
-          <View>
-            <TouchableOpacity style={styles.btnBack} onPress={this.haekka}>
-             <Text style={styles.btnText}>{this.state.listi[index].svar}</Text>
-            </TouchableOpacity>
-          </View>
+          {
+            randIndices.map((item,key)=>
+              <View key={key} style={styles.btnView}>
+                <TouchableOpacity style={styles.btnBack} onPress={()=> this.haekka(item===index)}>
+                  <Text style={styles.btnText}>{listi[item].svar}</Text>
+                </TouchableOpacity>
+              </View>
+
+            )
+            
+          }
         </View>
       );
 
@@ -49,6 +58,7 @@ export default class Spurningar extends React.Component {
         <View style={styles.container}>
           <View>
             <Text style={styles.greeting}>Takk fyrir!</Text>
+            <Text style={styles.greeting}>{this.state.score} af {this.state.listi.length}</Text>
           </View>
         </View>
       )
@@ -64,17 +74,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  btnView:  {
+    width: 100
+  },
   btnBack: {
-     marginTop: 50,
-     backgroundColor: 'green',
-     paddingLeft: 70,
-     paddingRight: 70,
-     paddingTop: 10,
-     paddingBottom: 10,
+     marginBottom: 15,
+     backgroundColor: 'blue',
+     paddingLeft: 5,
+     paddingRight: 5,
      borderWidth: 1
    },
    btnText: {
-    color: 'white'
+    color: 'white',
+    fontSize: 20
    },
    greeting: {
     fontSize: 50
