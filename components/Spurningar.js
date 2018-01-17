@@ -1,71 +1,8 @@
 import React from 'react';
-import { StyleSheet, Text, ListView,View, TouchableOpacity} from 'react-native';
+import {Animated,StyleSheet, Text, ListView,View, TouchableOpacity} from 'react-native';
 import {StackNavigator} from 'react-navigation';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {db,shuffle, random3} from '../database';
-
-export default class Spurningar extends React.Component {
-  constructor(props){
-    super(props);
-    this.state = {
-      listi: shuffle(db),
-      index: 0,
-      score: 0
-    };
-  }
-  componentDidMount() {
-    this.setState({listi: shuffle(db), index: 0, score: 0});
-  }
-
-  haekka = (b) => {
-
-    this.setState((state) => {
-      return {...state, index: state.index + 1,score: b? state.score+1:state.score};
-    });
-  }
-  /*
-     
-  */
-  render() {
-    const {index,listi} = this.state;
-    const n = listi.length;
-
-    let randIndices = random3(index, n);
-    if (index < n) {
-      return (
-        <View style={styles.container}>
-          <View style={{marginBottom: 20}}>
-            <Icon name={listi[index].mynd} size={80} color="#900" />
-            
-          </View>
-          {
-            randIndices.map((item,key)=>
-              <View key={key} style={styles.btnView}>
-                <TouchableOpacity style={styles.btnBack} onPress={()=> this.haekka(item===index)}>
-                  <Text style={styles.btnText}>{listi[item].svar}</Text>
-                </TouchableOpacity>
-              </View>
-
-            )
-            
-          }
-        </View>
-      );
-
-    }
-    else {
-      return (
-        <View style={styles.container}>
-          <View>
-            <Text style={styles.greeting}>Takk fyrir!</Text>
-            <Text style={styles.greeting}>{this.state.score} af {this.state.listi.length}</Text>
-          </View>
-        </View>
-      )
-    }
-    
-  }
-}
 
 const styles = StyleSheet.create({
   container: {
@@ -90,5 +27,124 @@ const styles = StyleSheet.create({
    },
    greeting: {
     fontSize: 50
+   },
+   feedback: {
+    fontSize: 40,
    }
 });
+
+
+export default class Spurningar extends React.Component {
+  constructor(props){
+    super(props);
+    this.state = {
+      listi: shuffle(db),
+      index: 0,
+      score: 0,
+      svar: '',
+      face: 'smile-o',
+      feedback: new Animated.Value(0),
+      question: new Animated.Value(1)
+    };
+  }
+  componentDidMount() {
+    this.setState({listi: shuffle(db), index: 0, score: 0, feedback: new Animated.Value(0), question: new Animated.Value(1)});
+  }
+
+  haekka = (b) => {
+    
+    if (b)
+      this.setState({svar: 'Rétt svar!', feedColor: 'green',face: 'smile-o'});
+    else
+      this.setState({svar: 'Rangt svar', feedColor: 'red',face: 'frown-o'});
+    Animated.sequence([
+      Animated.timing(                  
+        this.state.question,            
+        {
+          toValue: 0,
+          duration: 500
+        }
+      ),
+      Animated.timing(                  
+        this.state.feedback,            
+        {
+          toValue: 1,
+          duration: 1000
+        }
+      ),
+      Animated.timing(                  
+        this.state.feedback,            
+        {
+          toValue: 0,
+          duration: 1000
+        }
+      ),
+      Animated.timing(                  
+        this.state.question,            
+        {
+          toValue: 1,
+          duration: 1,
+        }
+      ),       
+    ]).start(()=>
+      this.setState((state) => {
+      return {...state, index: state.index + 1,
+                        score: b? state.score+1:state.score,
+              };
+      })
+    ); 
+    
+    
+  }
+  
+  render() {
+    const {index,listi,feedback,question,svar,feedColor,face} = this.state;
+    const n = listi.length;
+    
+
+    let randIndices = random3(index, n);
+    if (index < n) {
+      return (
+        <View style={styles.container}>
+          <Animated.View                 
+            style={{opacity: feedback}}
+          >
+            <Icon name={face} style={[styles.feedback, {color: feedColor}, {fontSize: 84}]} />
+          </Animated.View>
+          <Animated.View style={{marginBottom: 20, opacity: question}}>
+            <Icon name={listi[index].mynd} size={80} color="#900" />
+            
+          </Animated.View>
+          {
+            randIndices.map((item,key)=>
+              <Animated.View key={key} style={{opacity: question}}>
+                <TouchableOpacity style={styles.btnBack} onPress={()=> this.haekka(item===index)}>
+                  <Text style={styles.btnText}>{listi[item].svar}</Text>
+                </TouchableOpacity>
+              </Animated.View>
+
+            )
+            
+          }
+          
+          
+        </View>
+        
+      );
+
+    }
+    else {
+      return (
+        <View style={styles.container}>
+          <View>
+            <Text style={styles.greeting}>Takk fyrir!</Text>
+            <Text style={styles.greeting}>{this.state.score} af {this.state.listi.length}</Text>
+          </View>
+        </View>
+      )
+    }
+    
+  }
+}
+
+
