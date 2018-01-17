@@ -9,21 +9,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   btnView:  {
-    width: 100
+    width: '50%',
+    
   },
   btnBack: {
      marginBottom: 15,
      backgroundColor: 'blue',
-     paddingLeft: 5,
-     paddingRight: 5,
-     borderWidth: 1
+     borderRadius: 10
    },
    btnText: {
     color: 'white',
-    fontSize: 20
+    width: '100%',
+    fontSize: 24,
+    paddingTop: 5,
+    paddingBottom: 5,
+    paddingLeft: '10%',
+    paddingRight: '10%',
    },
    greeting: {
     fontSize: 50
@@ -117,7 +121,7 @@ export default class Spurningar extends React.Component {
           </Animated.View>
           {
             randIndices.map((item,key)=>
-              <Animated.View key={key} style={{opacity: question}}>
+              <Animated.View key={key} style={[styles.btnView,{opacity: question}]}>
                 <TouchableOpacity style={styles.btnBack} onPress={()=> this.haekka(item===index)}>
                   <Text style={styles.btnText}>{listi[item].svar}</Text>
                 </TouchableOpacity>

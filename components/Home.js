@@ -29,6 +29,7 @@ const styles = StyleSheet.create({
      paddingRight: 70,
      borderWidth: 1,
      color: 'white',
-     fontSize: 22,
+     fontSize: 24,
+     borderRadius: 10
    },
 });
